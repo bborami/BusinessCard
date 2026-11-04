@@ -349,6 +349,19 @@ legend { font-size: 12px; letter-spacing: .12em; color: var(--muted); font-weigh
       </fieldset>
 
       <fieldset>
+        <legend>회사 로고</legend>
+        <div class="photo-pick">
+          <div class="logo-thumb" id="logoThumb"></div>
+          <div class="photo-actions">
+            <div class="btn-row">
+              <button type="button" class="btn small" id="logoAdd">로고 넣기</button>
+              <button type="button" class="btn small" id="logoClear">로고 빼기</button>
+            </div>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
         <legend>이름 / 소개</legend>
         <div class="field">
           <label for="name">이름</label>
@@ -508,7 +521,8 @@ function slugPrefix() { return PRETTY ? (SITE_URL || location.origin + '/').repl
 const FIELDS = { name: 'n', intro: 'i', company: 'c', phone: 'p', email: 'e', address: 'a', insta: 'g', photo: 'f', qr: 'q', logo: 'l', logoPos: 'o', logoStyle: 's', fax: 'x', certs: 'z' };
 const DRAFT_KEY = 'dcard-draft-v11';
 const MEGA_LOGO = 'data:image/png;base64,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';
-const logoSrc = (v) => (v === 'mega' ? MEGA_LOGO : safePhoto(v));
+// 로고는 기본으로 넣어요. '로고 빼기'를 누른 명함만 'none' 으로 저장돼 로고가 빠져요
+const logoSrc = (v) => (v === 'none' ? '' : !v || v === 'mega' ? MEGA_LOGO : safePhoto(v) || MEGA_LOGO);
 const EXAMPLE = {
   name: '김메가',
   intro: '복잡한 보험, 고객의 눈높이에 맞춰\n꼭 필요한 보장만 명쾌하게 설계해 드립니다',
@@ -665,7 +679,7 @@ function renderCard(d, mount) {
   if (instaHandle(d.insta || '')) rows.push(`<li><a href="${esc(instaHref(d.insta))}" target="_blank" rel="noopener"><span class="ic">${ICONS.insta}</span><span><span class="k">인스타그램</span><span class="v">@${esc(instaHandle(d.insta))}</span></span></a></li>`);
   if (d.address) rows.push(`<li><a href="${esc(mapHref(d.address))}" target="_blank" rel="noopener"><span class="ic">${ICONS.address}</span><span><span class="k">주소 · 지도에서 보기</span><span class="v">${esc(d.address)}</span></span></a></li>`);
 
-  const logo = MEGA_LOGO; // 회사 로고는 항상 고정으로 넣어요
+  const logo = logoSrc(d.logo);
   const certs = ((d.certs || '').includes(',') ? d.certs.split(',') : (d.certs || '').split(/\s+/)).map((c) => c.trim()).filter(Boolean).slice(0, 12);
   const logoStyle = 'c'; // 로고는 원래 색 그대로, 배경만 투명하게
   const logoHTML = logo ? `<div class="logo-chip st-${logoStyle} pos-l"><img src="${logo}" alt="${esc(d.company || '회사')} 로고"></div>` : '';
@@ -844,10 +858,12 @@ function fillForm() {
   renderCertOpts();
 }
 function updateLogoThumb() {
-  if (!$('logoThumb')) return;
-  const l = logoSrc(state.logo), th = $('logoThumb');
-  th.style.backgroundImage = l ? `url('${l}')` : '';
-  th.textContent = l ? '' : '로고 없음';
+  // 로고 그림은 항상 보여주고, 넣기/빼기 중 지금 상태 버튼만 강조해요
+  const on = !!logoSrc(state.logo), th = $('logoThumb');
+  th.style.backgroundImage = `url('${MEGA_LOGO}')`;
+  th.textContent = '';
+  $('logoAdd').classList.toggle('primary', on);
+  $('logoClear').classList.toggle('primary', !on);
 }
 function updatePhotoThumb() {
   const p = safePhoto(state.photo), th = $('photoThumb');
@@ -935,6 +951,8 @@ $('imgDl').addEventListener('click', (e) => {
 $('imgClose').addEventListener('click', () => { $('imgModal').hidden = true; });
 $('imgModal').addEventListener('click', (e) => { if (e.target === $('imgModal')) $('imgModal').hidden = true; });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') $('imgModal').hidden = true; });
+$('logoAdd').addEventListener('click', () => { state.logo = 'mega'; refresh(); });
+$('logoClear').addEventListener('click', () => { state.logo = 'none'; refresh(); });
 /* ----- 짧은 링크 만들기 / 수정하기 ----- */
 function syncPublishUi() {
   // 실제 사이트에서는 사이트 주소를, 미리보기처럼 주소가 없는 곳에서는 안내 문구를 보여줘요
