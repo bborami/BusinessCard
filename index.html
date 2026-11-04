@@ -816,8 +816,8 @@ function toast(msg) {
 /* ----- 편집기 ----- */
 const state = { ...EXAMPLE };
 const inputIds = ['name', 'intro', 'company', 'phone', 'insta', 'address', 'fax', 'email'];
-// 손해·생명·제3보험은 항상 선택된 고정 자격이에요
-const FIXED_CERTS = ['손해보험', '생명보험', '제3보험'];
+// 처음에는 손해·생명·제3보험이 선택돼 있지만, 다른 자격처럼 눌러서 뺄 수 있어요
+const FIXED_CERTS = [];
 const CERT_OPTIONS = ['손해보험', '생명보험', '제3보험', '변액보험', '펀드투자권유대행인', '증권투자권유대행인', '종합자산관리사(IFP)', '퇴직연금(IRP)모집인', '재무설계사(AFPK)', 'CFP'];
 const certList = (str) => (str || '').split(/[,·/\n]+|\s+/).map((c) => c.trim()).filter(Boolean);
 const certsOf = (d) => ((d.certs || '').includes(',') ? d.certs.split(',') : certList(d.certs)).map((c) => c.trim()).filter(Boolean);
