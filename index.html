@@ -182,14 +182,8 @@ legend { font-size: 12px; letter-spacing: .12em; color: var(--muted); font-weigh
   background: var(--navy-800) center center/cover no-repeat;
   display: flex; align-items: flex-end;
 }
-/* 사진의 흰 배경이 튀지 않도록 가장자리를 네이비로 번지게 하고 살짝 톤을 맞춰요 */
-.hero:not(.nophoto)::before {
-  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
-  background:
-    linear-gradient(90deg, var(--navy-900) 0%, rgba(11, 27, 56, .55) 9%, rgba(11, 27, 56, 0) 24%, rgba(11, 27, 56, 0) 76%, rgba(11, 27, 56, .55) 91%, var(--navy-900) 100%),
-    linear-gradient(180deg, rgba(11, 27, 56, .5) 0%, rgba(11, 27, 56, 0) 26%),
-    rgba(30, 58, 110, .16);
-}
+/* 4:5가 아닌 사진: 사진은 잘리지 않게 가운데에 두고, 남는 곳은 같은 사진을 흐리게 채워요 */
+.hero.fit { background-color: var(--navy-900); background-repeat: no-repeat, no-repeat; }
 .hero.nophoto {
   aspect-ratio: 4 / 3;
   background-image: radial-gradient(90% 80% at 50% 0%, #2a4f8f 0%, transparent 70%);
@@ -299,6 +293,15 @@ legend { font-size: 12px; letter-spacing: .12em; color: var(--muted); font-weigh
 .make-own a { color: var(--muted); }
 .card-error { max-width: 400px; margin: 0 auto; text-align: center; color: var(--muted); }
 
+.short-box { display: grid; gap: 12px; }
+.slug-row { display: flex; align-items: stretch; border: 1px solid var(--line); border-radius: 12px; background: var(--field); overflow: hidden; }
+.slug-row:focus-within { border-color: var(--gold); }
+.slug-pre { padding: 11px 0 11px 14px; color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%; flex: 0 0 auto; align-self: center; direction: rtl; text-align: left; unicode-bidi: plaintext; }
+.slug-row input { flex: 1 1 auto; min-width: 0; border: 0 !important; background: transparent !important; padding-left: 2px !important; border-radius: 0 !important; }
+.pub-info { background: rgba(214, 180, 106, .08); border: 1px solid rgba(214, 180, 106, .35); border-radius: 12px; padding: 12px 14px; color: var(--fg); }
+.pub-info code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--gold); font-size: 14px; user-select: all; }
+.load-box summary { cursor: pointer; font-size: 13px; color: var(--muted); }
+.load-box[open] { display: grid; gap: 10px; }
 .reset-row { display: flex; justify-content: center; padding-top: 8px; border-top: 1px solid var(--line); }
 .reset-row .btn { color: var(--muted); }
 .view-actions { display: flex; justify-content: center; }
@@ -348,7 +351,7 @@ legend { font-size: 12px; letter-spacing: .12em; color: var(--muted); font-weigh
               <button type="button" class="btn small" id="photoClear">사진 지우기</button>
             </div>
             <input type="file" id="photoFile" accept="image/jpeg,image/png" hidden>
-            <span class="hint">권장 1024 × 1280 (세로 4:5) · JPEG · PNG · 5MB 이하. 비율이 다르면 가운데를 기준으로 잘려요.</span>
+            <span class="hint">권장 1024 × 1280 (세로 4:5) · JPEG · PNG · 5MB 이하. 비율이 다르면 사진은 그대로 가운데에 두고 빈 곳만 흐리게 채워요.</span>
             <div class="field">
               <label for="photoUrl">또는 사진 주소(URL)</label>
               <input id="photoUrl" type="url" placeholder="https://.../profile.jpg">
@@ -442,16 +445,36 @@ legend { font-size: 12px; letter-spacing: .12em; color: var(--muted); font-weigh
 
       <section class="output" aria-labelledby="outTitle">
         <h2 id="outTitle">내 명함 링크</h2>
-        <div class="linkbox" id="linkBox"></div>
-        <div class="btn-row">
-          <button type="button" class="btn primary" id="shareKakao">카카오톡으로 공유</button>
-          <button type="button" class="btn" id="copyLink">링크 복사</button>
-          <button type="button" class="btn" id="openCard">명함 화면으로 보기</button>
-          <button type="button" class="btn" id="saveImg">이미지로 저장</button>
+        <div class="short-box" id="shortBox">
+          <div class="field">
+            <label for="slug">링크 주소</label>
+            <div class="slug-row"><span class="slug-pre" id="slugPre"></span><input id="slug" maxlength="30" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="kimmega"></div>
+            <span class="hint">영문 소문자·숫자·하이픈(-)으로 2~30자. 한 번 정하면 바꿀 수 없어요.</span>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn primary" id="publish">링크 만들기</button>
+            <button type="button" class="btn" id="copyShort">링크 복사</button>
+            <button type="button" class="btn" id="openCard">명함 화면으로 보기</button>
+            <button type="button" class="btn" id="saveImg">이미지로 저장</button>
+          </div>
+          <p class="note pub-info" id="pubInfo" hidden></p>
+          <details class="load-box">
+            <summary>다른 기기에서 만든 명함 수정하기</summary>
+            <div class="row2">
+              <div class="field"><label for="loadSlug">명함 주소</label><input id="loadSlug" maxlength="30" autocapitalize="off" spellcheck="false" placeholder="kimmega"></div>
+              <div class="field"><label for="loadCode">수정 코드</label><input id="loadCode" maxlength="40" autocapitalize="off" spellcheck="false" placeholder="처음 만들 때 받은 코드"></div>
+            </div>
+            <div class="btn-row"><button type="button" class="btn" id="loadCard">불러오기</button></div>
+          </details>
+          <p class="note" id="dbOff" hidden>링크는 사이트를 올린 뒤에 만들 수 있어요. 미리보기에서는 명함 화면 보기와 이미지 저장만 돼요.</p>
         </div>
-        <p class="note"><strong>카카오톡으로 공유하면 긴 링크 대신 사진과 이름이 담긴 명함 카드로 보내져요.</strong> 받는 사람은 카드의 "명함 보기" 버튼을 눌러 명함을 열어요.</p>
-        <p class="note" id="photoNote" hidden><strong>올린 사진은 링크 안에 담겨요.</strong> 그래서 링크가 길어지고, 큐알코드로 열면 사진 대신 이름 첫 글자가 보여요. 사진을 사진 주소(URL)로 넣으면 둘 다 사진이 나와요.</p>
-        <p class="note">입력한 내용은 서버에 저장되지 않고 링크 자체에 들어 있어요. 내용을 바꾸면 링크도 새로 복사해서 보내 주세요.</p>
+        <!-- 긴 링크는 화면에서 뺐어요. 저장소에 문제가 생겼을 때를 위한 예비 기능으로만 남겨 둬요 -->
+        <div hidden>
+          <div id="linkBox"></div>
+          <button type="button" id="copyLink">긴 링크 복사</button>
+          <p id="photoNote"></p>
+          <p id="hashNote"></p>
+        </div>
       </section>
 
       <div class="reset-row">
@@ -497,7 +520,14 @@ legend { font-size: 12px; letter-spacing: .12em; color: var(--muted); font-weigh
 const KAKAO_JS_KEY = '';
 // 명함 사이트 주소. 예: 'https://bborami.github.io/card/'  (비워두면 현재 주소를 사용)
 const SITE_URL = '';
+// Supabase(짧은 링크 저장소) > Project Settings > API 의 Project URL 과 anon(publishable) 키
+// 비워두면 지금처럼 정보가 링크 안에 담기는 방식으로만 동작해요.
+const SUPABASE_URL = 'https://tgxkbbisamxfkgypqtdo.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_rslhyKpfUMeQXHvfv8xA1A_5ueHLAMc';
 /* ========================================== */
+const DB_ON = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
+const PUB_KEY = 'dcard-pub-v1';
+const SLUG_RE = /^[a-z0-9][a-z0-9-]{1,29}$/;
 
 const FIELDS = { name: 'n', intro: 'i', company: 'c', phone: 'p', email: 'e', address: 'a', insta: 'g', photo: 'f', qr: 'q', logo: 'l', logoPos: 'o', logoStyle: 's', fax: 'x', certs: 'z' };
 const DRAFT_KEY = 'dcard-draft-v10';
@@ -541,15 +571,68 @@ function encode(d, { noUploadedPhoto = false } = {}) {
   }
   return LZString.compressToEncodedURIComponent(JSON.stringify(o));
 }
+function fromShort(o) {
+  const d = {};
+  for (const [k, short] of Object.entries(FIELDS)) d[k] = (o && o[short]) || '';
+  return d;
+}
+function toShort(d) {
+  const o = {};
+  for (const [k, short] of Object.entries(FIELDS)) { const v = (d[k] || '').trim(); if (v) o[short] = v; }
+  return o;
+}
 function decode(s) {
   const json = LZString.decompressFromEncodedURIComponent(s);
   if (!json) return null;
-  const o = JSON.parse(json), d = {};
-  for (const [k, short] of Object.entries(FIELDS)) d[k] = o[short] || '';
-  return d;
+  return fromShort(JSON.parse(json));
 }
 function baseUrl() { return SITE_URL || (location.origin + location.pathname); }
-function cardUrl(d, opt) { return baseUrl() + '#c=' + encode(d, opt); }
+// 저장소에 저장된 명함은 "사이트주소/?kimmega" 처럼 짧은 링크를 써요
+function longUrl(d) { return baseUrl() + '#c=' + encode(d); }
+function cardUrl(d, opt) {
+  if (d && d._slug) return baseUrl() + '?' + d._slug;
+  return baseUrl() + '#c=' + encode(d, opt);
+}
+
+/* ----- Supabase 저장소 ----- */
+let sbPromise = null;
+function getSb() {
+  if (!DB_ON) return Promise.resolve(null);
+  if (!sbPromise) {
+    sbPromise = new Promise((resolve) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js';
+      s.onload = () => {
+        try { resolve(window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false } })); }
+        catch (e) { resolve(null); }
+      };
+      s.onerror = () => resolve(null);
+      document.head.appendChild(s);
+    });
+  }
+  return sbPromise;
+}
+function loadPub() { try { return JSON.parse(localStorage.getItem(PUB_KEY) || 'null'); } catch (e) { return null; } }
+function savePub(p) { try { localStorage.setItem(PUB_KEY, JSON.stringify(p)); } catch (e) {} }
+async function fetchCard(slug) {
+  const sb = await getSb();
+  if (!sb) throw new Error('no_db');
+  const { data, error } = await sb.from('cards').select('data').eq('slug', slug).maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+  const d = fromShort(data.data);
+  d._slug = slug;
+  return d;
+}
+function dbErrorText(e) {
+  const m = (e && (e.message || e.error_description || String(e))) || '';
+  if (m.includes('slug_taken')) return '이미 다른 사람이 쓰는 주소예요. 다른 주소를 넣어 주세요';
+  if (m.includes('bad_slug')) return '주소는 영문 소문자·숫자·하이픈(-)으로 2~30자만 쓸 수 있어요';
+  if (m.includes('bad_token')) return '수정 코드가 맞지 않아요. 처음 만들 때 받은 코드를 확인해 주세요';
+  if (m.includes('too_large')) return '내용이 너무 길어요. 소개를 조금 줄여 주세요';
+  if (m.includes('no_db')) return '저장소에 연결하지 못했어요. 잠시 뒤 다시 해 주세요';
+  return '저장하지 못했어요. 잠시 뒤 다시 해 주세요';
+}
 
 /* ----- 링크 만들기 도우미 ----- */
 const telHref = (p) => 'tel:' + p.replace(/[^\d+]/g, '');
@@ -566,6 +649,33 @@ function safePhoto(src) {
   if (/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(src)) return src;
   if (/^https?:\/\/[^\s"'()<>]+$/i.test(src)) return src;
   return '';
+}
+
+/* ----- 사진 비율 맞추기 ----- */
+// 4:5 사진은 원본 그대로(cover). 비율이 다르면 사진 전체를 가운데 두고(contain),
+// 남는 공간은 같은 사진을 아주 작게 줄였다 키운 흐린 배경으로 채워요.
+function fitHeroPhoto(hero, src) {
+  const im = new Image();
+  if (/^https?:/i.test(src)) im.crossOrigin = 'anonymous';
+  im.onload = () => {
+    const r = im.naturalWidth / im.naturalHeight;
+    if (Math.abs(r - 0.8) <= 0.03) return; // 비율이 맞으면 깨끗한 원본 그대로
+    let blur = '';
+    try {
+      const c = document.createElement('canvas'); c.width = 16; c.height = 20;
+      const g = c.getContext('2d');
+      const s = Math.max(16 / im.naturalWidth, 20 / im.naturalHeight);
+      const w = im.naturalWidth * s, h = im.naturalHeight * s;
+      g.drawImage(im, (16 - w) / 2, (20 - h) / 2, w, h);
+      g.fillStyle = 'rgba(11, 27, 56, .35)'; g.fillRect(0, 0, 16, 20);
+      blur = c.toDataURL('image/png');
+    } catch (e) { /* 다른 사이트 사진은 흐린 배경 없이 네이비로 채워요 */ }
+    hero.classList.add('fit');
+    hero.style.backgroundImage = blur ? `url('${src}'), url('${blur}')` : `url('${src}')`;
+    hero.style.backgroundSize = blur ? 'contain, cover' : 'contain';
+    hero.style.backgroundPosition = 'center, center';
+  };
+  im.src = src;
 }
 
 /* ----- 명함 그리기 ----- */
@@ -609,6 +719,7 @@ function renderCard(d, mount) {
       </div>
     </article>`;
 
+  if (photo) fitHeroPhoto(mount.querySelector('.hero'), photo);
   const qrBox = mount.querySelector('[data-qr]');
   const target = d.qr || cardUrl(d, { noUploadedPhoto: true });
   try {
@@ -786,9 +897,10 @@ function refresh() {
   clearTimeout(renderTimer);
   renderTimer = setTimeout(() => {
     renderCard(state, $('preview'));
-    $('linkBox').textContent = cardUrl(state);
+    $('linkBox').textContent = longUrl(state);
     updatePhotoThumb();
     updateLogoThumb();
+    $('hashNote').hidden = !!state._slug;
     saveDraft();
   }, 120);
 }
@@ -807,14 +919,12 @@ $('photoFile').addEventListener('change', (e) => {
   const reader = new FileReader();
   reader.onload = () => { img.src = reader.result; };
   img.onload = () => {
-    // 링크 길이를 줄이려고 작은 정사각형으로 잘라 압축해요
-    // 1024×1280과 같은 4:5 비율로 가운데를 잘라 작게 줄여요
-    const W = 360, H = 450, c = document.createElement('canvas');
+    // 사진 비율은 그대로 두고, 링크 길이를 줄이려고 360×450 안에 들어가게 줄여요
+    const k = DB_ON ? Math.min(1, 900 / img.width, 1125 / img.height) : Math.min(1, 360 / img.width, 450 / img.height);
+    const W = Math.round(img.width * k), H = Math.round(img.height * k), c = document.createElement('canvas');
     c.width = W; c.height = H;
-    let sw = img.width, sh = img.width * 5 / 4;
-    if (sh > img.height) { sh = img.height; sw = img.height * 4 / 5; }
-    c.getContext('2d').drawImage(img, (img.width - sw) / 2, (img.height - sh) / 2, sw, sh, 0, 0, W, H);
-    state.photo = c.toDataURL('image/jpeg', 0.7);
+    c.getContext('2d').drawImage(img, 0, 0, W, H);
+    state.photo = c.toDataURL('image/jpeg', DB_ON ? 0.85 : 0.7);
     $('photoUrl').value = '';
     refresh();
   };
@@ -864,8 +974,97 @@ $('imgDl').addEventListener('click', (e) => {
 $('imgClose').addEventListener('click', () => { $('imgModal').hidden = true; });
 $('imgModal').addEventListener('click', (e) => { if (e.target === $('imgModal')) $('imgModal').hidden = true; });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') $('imgModal').hidden = true; });
-$('shareKakao').addEventListener('click', () => shareCard(state, $('preview').querySelector('.card')));
-$('copyLink').addEventListener('click', () => copyText(cardUrl(state), '명함 링크를 복사했어요'));
+/* ----- 짧은 링크 만들기 / 수정하기 ----- */
+function syncPublishUi() {
+  // 실제 사이트에서는 사이트 주소를, 미리보기처럼 주소가 없는 곳에서는 안내 문구를 보여줘요
+  const realSite = SITE_URL || /^https?:$/.test(location.protocol) && location.origin !== 'null';
+  $('slugPre').textContent = realSite ? baseUrl().replace(/^https?:\/\//, '') + '?' : '사용할 링크 주소/?';
+  const pub = loadPub();
+  const slug = $('slug').value.trim().toLowerCase();
+  const mine = pub && pub.slug && pub.slug === slug;
+  $('publish').textContent = mine ? '바뀐 내용 저장' : '링크 만들기';
+  if (mine) {
+    $('pubInfo').hidden = false;
+    $('pubInfo').innerHTML = `내 명함 링크: <code>${esc(baseUrl() + '?' + pub.slug)}</code><br>수정 코드: <code>${esc(pub.token)}</code><br>다른 기기에서 고칠 때 필요해요. 꼭 메모해 두세요.`;
+  } else {
+    $('pubInfo').hidden = true;
+  }
+  $('hashNote').hidden = !!state._slug;
+}
+function initPublishUi() {
+  if (!DB_ON) {
+    $('dbOff').hidden = false;
+    for (const id of ['slug', 'publish', 'loadSlug', 'loadCode', 'loadCard']) $(id).disabled = true;
+  }
+  const pub = loadPub();
+  $('slug').value = (state._slug || (pub && pub.slug) || '');
+  syncPublishUi();
+}
+let publishing = false;
+async function publishCard() {
+  if (publishing) return;
+  const slug = $('slug').value.trim().toLowerCase();
+  $('slug').value = slug;
+  if (!SLUG_RE.test(slug)) { toast('주소는 영문 소문자·숫자·하이픈(-)으로 2~30자만 쓸 수 있어요'); $('slug').focus(); return; }
+  publishing = true;
+  const btn = $('publish'), label = btn.textContent;
+  btn.disabled = true; btn.textContent = '저장하는 중…';
+  try {
+    const sb = await getSb();
+    if (!sb) throw new Error('no_db');
+    // 직접 올린 사진은 저장소에 올리고, 명함에는 사진 주소만 남겨요
+    if ((state.photo || '').startsWith('data:')) {
+      const blob = await (await fetch(state.photo)).blob();
+      const path = `${slug}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}.jpg`;
+      const up = await sb.storage.from('card-photos').upload(path, blob, { contentType: 'image/jpeg', upsert: false });
+      if (up.error) throw up.error;
+      state.photo = sb.storage.from('card-photos').getPublicUrl(path).data.publicUrl;
+      $('photoUrl').value = state.photo;
+    }
+    const data = toShort(state);
+    const pub = loadPub();
+    if (pub && pub.slug === slug) {
+      const { error } = await sb.rpc('update_card', { p_slug: slug, p_token: pub.token, p_data: data });
+      if (error) throw error;
+      toast('바뀐 내용을 저장했어요. 링크는 그대로예요');
+    } else {
+      const { data: token, error } = await sb.rpc('create_card', { p_slug: slug, p_data: data });
+      if (error) throw error;
+      savePub({ slug, token });
+      toast('링크를 만들었어요');
+    }
+    state._slug = slug;
+    refresh();
+  } catch (e) {
+    toast(dbErrorText(e));
+  } finally {
+    publishing = false;
+    btn.disabled = false; btn.textContent = label;
+    syncPublishUi();
+  }
+}
+async function loadForEdit() {
+  const slug = $('loadSlug').value.trim().toLowerCase(), code = $('loadCode').value.trim();
+  if (!SLUG_RE.test(slug) || !code) { toast('명함 주소와 수정 코드를 모두 넣어 주세요'); return; }
+  try {
+    const d = await fetchCard(slug);
+    if (!d) { toast('그 주소로 만든 명함이 없어요'); return; }
+    for (const k of Object.keys(state)) state[k] = '';
+    Object.assign(state, d);
+    savePub({ slug, token: code });
+    fillForm(); $('slug').value = slug; refresh(); syncPublishUi();
+    toast('명함을 불러왔어요. 고친 뒤 "바뀐 내용 저장"을 눌러 주세요');
+  } catch (e) { toast(dbErrorText(e)); }
+}
+$('publish').addEventListener('click', publishCard);
+$('slug').addEventListener('input', syncPublishUi);
+$('loadCard').addEventListener('click', loadForEdit);
+
+$('copyLink').addEventListener('click', () => copyText(longUrl(state), '긴 링크를 복사했어요'));
+$('copyShort').addEventListener('click', () => {
+  if (!state._slug) { toast('먼저 "링크 만들기"를 눌러 주세요'); return; }
+  copyText(baseUrl() + '?' + state._slug, '링크를 복사했어요');
+});
 $('openCard').addEventListener('click', () => { location.hash = 'c=' + encode(state); });
 $('resetForm').addEventListener('click', () => {
   for (const k of Object.keys(state)) state[k] = '';
@@ -876,8 +1075,26 @@ $('makeOwn').addEventListener('click', (e) => { e.preventDefault(); history.repl
 
 /* ----- 화면 전환: #c=... 이면 명함, 아니면 편집기 ----- */
 let currentCard = null;
+async function routeSlug(slug) {
+  $('editorView').hidden = true; $('cardView').hidden = false;
+  $('saveImg2').hidden = true;
+  $('cardMount').innerHTML = '<p class="card-error">명함을 불러오는 중이에요…</p>';
+  let d = null;
+  try { d = await fetchCard(slug); } catch (e) {}
+  currentCard = d;
+  $('saveImg2').hidden = !d;
+  if (d) {
+    renderCard(d, $('cardMount'));
+    document.title = (d.name ? d.name + ' · ' : '') + '디지털 명함';
+  } else {
+    $('cardMount').innerHTML = '<p class="card-error">명함을 찾을 수 없어요. 주소를 다시 확인해 주세요.</p>';
+  }
+  loadKakao();
+}
 function route() {
   const h = location.hash.slice(1);
+  const q = location.search.slice(1);
+  if (!h && SLUG_RE.test(q)) { routeSlug(q); return; }
   if (h.startsWith('c=')) {
     let d = null;
     try { d = decode(h.slice(2)); } catch (e) {}
@@ -896,7 +1113,7 @@ function route() {
     $('cardView').hidden = true; $('editorView').hidden = false;
     document.title = '디지털 명함 만들기';
     renderCard(state, $('preview'));
-    $('linkBox').textContent = cardUrl(state);
+    $('linkBox').textContent = longUrl(state);
     updatePhotoThumb();
     updateLogoThumb();
   }
@@ -905,6 +1122,7 @@ window.addEventListener('hashchange', route);
 
 loadDraft();
 fillForm();
+initPublishUi();
 route();
 </script>
 </body>
