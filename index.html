@@ -1047,6 +1047,7 @@ $('copyShort').addEventListener('click', () => {
 $('openCard').addEventListener('click', () => { location.hash = 'c=' + encode(state); });
 $('resetForm').addEventListener('click', () => {
   for (const k of Object.keys(state)) state[k] = '';
+  state.intro = EXAMPLE.intro; // 소개는 기본 문구로 채워 두고, 작성자가 고칠 수 있어요
   fillForm(); refresh(); $('name').focus();
 });
 $('form').addEventListener('submit', (e) => e.preventDefault());
