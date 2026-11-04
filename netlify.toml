@@ -1,0 +1,14 @@
+# Netlify 설정: 어떤 주소로 들어와도 index.html 이 열리고(/kimmega 등),
+# 명함 주소로 들어오면 edge function 이 그 사람 정보로 링크 미리보기(오픈 그래프)를 바꿔요.
+[build]
+  publish = "."
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[edge_functions]]
+  function = "card-preview"
+  path = "/*"
+  excludedPath = ["/*.*"]
