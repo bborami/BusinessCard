@@ -284,6 +284,8 @@ legend { font-size: 12px; letter-spacing: .12em; color: var(--muted); font-weigh
 .slug-row:focus-within { border-color: var(--gold); }
 .slug-pre { padding: 11px 0 11px 14px; color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 44%; flex: 0 0 auto; align-self: center; direction: rtl; text-align: left; unicode-bidi: plaintext; }
 .slug-row input::placeholder { font-size: 12.5px; letter-spacing: -.02em; }
+/* 인스타그램 칸 앞의 @ 는 고정이라 지울 수 없어요 */
+.slug-pre.insta-at { direction: ltr; padding-right: 0; font-size: 15px; color: var(--fg); }
 .slug-row input:focus::placeholder { color: transparent; }
 .slug-row input { flex: 1 1 auto; min-width: 0; border: 0 !important; background: transparent !important; padding-left: 2px !important; border-radius: 0 !important; }
 .pub-info { background: rgba(214, 180, 106, .08); border: 1px solid rgba(214, 180, 106, .35); border-radius: 12px; padding: 12px 14px; color: var(--fg); }
@@ -386,7 +388,7 @@ legend { font-size: 12px; letter-spacing: .12em; color: var(--muted); font-weigh
           </div>
           <div class="field">
             <label for="insta">📷 인스타그램</label>
-            <input id="insta" maxlength="80" placeholder="@아이디 또는 instagram.com/아이디">
+            <div class="slug-row"><span class="slug-pre insta-at">@</span><input id="insta" maxlength="80" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="아이디"></div>
           </div>
         </div>
         <div class="field">
@@ -853,7 +855,7 @@ function saveDraft() {
   try { localStorage.setItem(DRAFT_KEY, JSON.stringify(state)); } catch (e) {}
 }
 function fillForm() {
-  for (const id of inputIds) $(id).value = state[id] || '';
+  for (const id of inputIds) $(id).value = id === 'insta' ? (state.insta || '').replace(/^@+/, '') : state[id] || '';
   $('photoUrl').value = state.photo.startsWith('data:') ? '' : state.photo;
   renderCertOpts();
 }
@@ -885,7 +887,12 @@ function refresh() {
 }
 
 for (const id of inputIds) {
-  $(id).addEventListener('input', (e) => { state[id] = e.target.value; refresh(); });
+  $(id).addEventListener('input', (e) => {
+    // 인스타그램은 앞에 @ 가 항상 붙어 있어요 (칸에는 아이디만 써요)
+    if (id === 'insta' && e.target.value.startsWith('@')) e.target.value = e.target.value.replace(/^@+/, '');
+    state[id] = id === 'insta' ? '@' + e.target.value.trim().replace(/^@+/, '') : e.target.value;
+    refresh();
+  });
 }
 $('photoUrl').addEventListener('input', (e) => { state.photo = e.target.value.trim(); refresh(); });
 $('photoClear').addEventListener('click', () => { state.photo = ''; $('photoUrl').value = ''; $('photoFile').value = ''; refresh(); });
@@ -1047,6 +1054,7 @@ $('copyShort').addEventListener('click', () => {
 $('openCard').addEventListener('click', () => { location.hash = 'c=' + encode(state); });
 $('resetForm').addEventListener('click', () => {
   for (const k of Object.keys(state)) state[k] = '';
+  state.insta = '@';
   state.intro = EXAMPLE.intro; // 소개는 기본 문구로 채워 두고, 작성자가 고칠 수 있어요
   fillForm(); refresh(); $('name').focus();
 });
