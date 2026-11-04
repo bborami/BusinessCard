@@ -575,7 +575,7 @@ const EXAMPLE = {
   name: '김메가',
   intro: '복잡한 보험, 고객의 눈높이에 맞춰\n꼭 필요한 보장만 명쾌하게 설계해 드립니다',
   company: '메가금융프라자 · 팀장',
-  phone: '010-1234-5678',
+  phone: '', // 연락처는 비워 두고 안내 문구(010-1234-5678)만 보여줘요
   fax: '', email: '',
   certs: '손해보험,생명보험,제3보험',
   address: '전주시 완산구 홍산중앙로 38',
@@ -903,6 +903,7 @@ function addCert() {
 
 function loadDraft() {
   try { const s = localStorage.getItem(DRAFT_KEY); if (s) Object.assign(state, JSON.parse(s)); } catch (e) {}
+  if (state.phone === '010-1234-5678') state.phone = ''; // 예전 예시 번호가 저장돼 있으면 지워요
 }
 function saveDraft() {
   try { localStorage.setItem(DRAFT_KEY, JSON.stringify(state)); } catch (e) {}
