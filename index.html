@@ -117,6 +117,8 @@ legend { font-size: 12px; letter-spacing: .12em; color: var(--muted); font-weigh
 .swatch:has(input:checked) { color: var(--fg); font-weight: 600; }
 .swatch:has(input:checked) .chip { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(214, 180, 106, .35); transform: scale(1.05); }
 .swatch:has(input:focus-visible) .chip { outline: 2px solid var(--gold); outline-offset: 2px; }
+/* 휴대폰(iOS)에서 입력칸을 누를 때 화면이 확대되지 않게 16px */
+@media (max-width: 860px) { .field input, .field textarea { font-size: 16px; } }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 @media (max-width: 520px) { .row2 { grid-template-columns: 1fr; } }
 
@@ -290,7 +292,7 @@ legend { font-size: 12px; letter-spacing: .12em; color: var(--muted); font-weigh
 .short-box { display: grid; gap: 12px; }
 .slug-row { display: flex; align-items: stretch; border: 1px solid var(--line); border-radius: 12px; background: var(--field); overflow: hidden; }
 .slug-row:focus-within { border-color: var(--gold); }
-.slug-pre { padding: 11px 0 11px 14px; color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 44%; flex: 0 0 auto; align-self: center; direction: rtl; text-align: left; unicode-bidi: plaintext; }
+.slug-pre { padding: 11px 0 11px 14px; color: var(--muted); font-size: 13px; white-space: nowrap; flex: 0 0 auto; align-self: center; }
 .slug-row input::placeholder { font-size: 12.5px; letter-spacing: -.02em; }
 /* 인스타그램 칸 앞의 @ 는 고정이라 지울 수 없어요 */
 .slug-pre.insta-at { direction: ltr; padding-right: 0; font-size: 15px; color: var(--fg); }
@@ -1017,7 +1019,11 @@ $('logoClear').addEventListener('click', () => { state.logo = 'none'; refresh();
 function syncPublishUi() {
   // 실제 사이트에서는 사이트 주소를, 미리보기처럼 주소가 없는 곳에서는 안내 문구를 보여줘요
   const realSite = SITE_URL || /^https?:$/.test(location.protocol) && location.origin !== 'null';
-  $('slugPre').textContent = realSite ? slugPrefix().replace(/^https?:\/\//, '') : '사용할 링크 주소/';
+  // 앞부분은 "…" 으로 줄이고 끝부분(예: …BusinessCard/?)만 보여줘요. 전체 주소는 길게 누르면 보여요
+  const full = realSite ? slugPrefix().replace(/^https?:\/\//, '') : '사용할 링크 주소/';
+  const tail = full.match(/[^/]*\/\??$/);
+  $('slugPre').textContent = realSite && tail && tail[0].length < full.length ? '…' + tail[0] : full;
+  $('slugPre').title = full;
   const pub = loadPub();
   const slug = $('slug').value.trim().toLowerCase();
   const mine = pub && pub.slug && pub.slug === slug;
