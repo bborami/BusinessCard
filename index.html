@@ -283,6 +283,7 @@ legend { font-size: 12px; letter-spacing: .12em; color: var(--muted); font-weigh
 .slug-row { display: flex; align-items: stretch; border: 1px solid var(--line); border-radius: 12px; background: var(--field); overflow: hidden; }
 .slug-row:focus-within { border-color: var(--gold); }
 .slug-pre { padding: 11px 0 11px 14px; color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%; flex: 0 0 auto; align-self: center; direction: rtl; text-align: left; unicode-bidi: plaintext; }
+.slug-row input:focus::placeholder { color: transparent; }
 .slug-row input { flex: 1 1 auto; min-width: 0; border: 0 !important; background: transparent !important; padding-left: 2px !important; border-radius: 0 !important; }
 .pub-info { background: rgba(214, 180, 106, .08); border: 1px solid rgba(214, 180, 106, .35); border-radius: 12px; padding: 12px 14px; color: var(--fg); }
 .pub-info code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--gold); font-size: 14px; user-select: all; }
@@ -425,7 +426,7 @@ legend { font-size: 12px; letter-spacing: .12em; color: var(--muted); font-weigh
         <div class="short-box" id="shortBox">
           <div class="field">
             <label for="slug">링크 주소</label>
-            <div class="slug-row"><span class="slug-pre" id="slugPre"></span><input id="slug" maxlength="30" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="kimmega"></div>
+            <div class="slug-row"><span class="slug-pre" id="slugPre"></span><input id="slug" maxlength="30" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="원하는 주소를 써주세요"></div>
             <span class="hint">영문 소문자·숫자·하이픈(-)으로 2~30자. 한 번 정하면 바꿀 수 없어요.</span>
           </div>
           <div class="btn-row">
@@ -955,7 +956,7 @@ function syncPublishUi() {
   const pub = loadPub();
   const slug = $('slug').value.trim().toLowerCase();
   const mine = pub && pub.slug && pub.slug === slug;
-  $('publish').textContent = mine ? '바뀐 내용 저장' : '링크 만들기';
+  $('publish').textContent = mine ? '링크 저장' : '링크 만들기';
   if (mine) {
     $('pubInfo').hidden = false;
     $('pubInfo').innerHTML = `내 명함 링크: <code>${esc(slugUrl(pub.slug))}</code><br>수정 코드: <code>${esc(pub.token)}</code><br>다른 기기에서 고칠 때 필요해요. 꼭 메모해 두세요.`;
@@ -970,7 +971,7 @@ function initPublishUi() {
     for (const id of ['slug', 'publish', 'loadSlug', 'loadCode', 'loadCard']) $(id).disabled = true;
   }
   const pub = loadPub();
-  $('slug').value = (state._slug || (pub && pub.slug) || '');
+  $('slug').value = state._slug || '';
   syncPublishUi();
 }
 let publishing = false;
@@ -1026,7 +1027,7 @@ async function loadForEdit() {
     Object.assign(state, d);
     savePub({ slug, token: code });
     fillForm(); $('slug').value = slug; refresh(); syncPublishUi();
-    toast('명함을 불러왔어요. 고친 뒤 "바뀐 내용 저장"을 눌러 주세요');
+    toast('명함을 불러왔어요. 고친 뒤 "링크 저장"을 눌러 주세요');
   } catch (e) { toast(dbErrorText(e)); }
 }
 $('publish').addEventListener('click', publishCard);
