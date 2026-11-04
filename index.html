@@ -525,6 +525,13 @@ const SITE_URL = '';
 const SUPABASE_URL = 'https://tgxkbbisamxfkgypqtdo.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_rslhyKpfUMeQXHvfv8xA1A_5ueHLAMc';
 /* ========================================== */
+// 실제 운영 주소(Netlify). GitHub Pages 주소로 들어오면 이 주소로 옮겨줘요.
+const MAIN_SITE = 'https://tranquil-semolina-9cef81.netlify.app';
+if (MAIN_SITE && /github\.io$/.test(location.hostname)) {
+  const q = location.search.slice(1);
+  const slug = /^[a-z0-9][a-z0-9-]{1,29}$/.test(q) ? q : '';
+  location.replace(MAIN_SITE + '/' + slug + location.hash);
+}
 const DB_ON = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
 const PUB_KEY = 'dcard-pub-v1';
 const SLUG_RE = /^[a-z0-9][a-z0-9-]{1,29}$/;
