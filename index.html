@@ -349,19 +349,6 @@ legend { font-size: 12px; letter-spacing: .12em; color: var(--muted); font-weigh
       </fieldset>
 
       <fieldset>
-        <legend>회사 로고</legend>
-        <div class="photo-pick">
-          <div class="logo-thumb" id="logoThumb"></div>
-          <div class="photo-actions">
-            <div class="btn-row">
-              <button type="button" class="btn small" id="logoAdd">로고 넣기</button>
-              <button type="button" class="btn small" id="logoClear">로고 빼기</button>
-            </div>
-          </div>
-        </div>
-      </fieldset>
-
-      <fieldset>
         <legend>이름 / 소개</legend>
         <div class="field">
           <label for="name">이름</label>
@@ -678,7 +665,7 @@ function renderCard(d, mount) {
   if (instaHandle(d.insta || '')) rows.push(`<li><a href="${esc(instaHref(d.insta))}" target="_blank" rel="noopener"><span class="ic">${ICONS.insta}</span><span><span class="k">인스타그램</span><span class="v">@${esc(instaHandle(d.insta))}</span></span></a></li>`);
   if (d.address) rows.push(`<li><a href="${esc(mapHref(d.address))}" target="_blank" rel="noopener"><span class="ic">${ICONS.address}</span><span><span class="k">주소 · 지도에서 보기</span><span class="v">${esc(d.address)}</span></span></a></li>`);
 
-  const logo = logoSrc(d.logo);
+  const logo = MEGA_LOGO; // 회사 로고는 항상 고정으로 넣어요
   const certs = ((d.certs || '').includes(',') ? d.certs.split(',') : (d.certs || '').split(/\s+/)).map((c) => c.trim()).filter(Boolean).slice(0, 12);
   const logoStyle = 'c'; // 로고는 원래 색 그대로, 배경만 투명하게
   const logoHTML = logo ? `<div class="logo-chip st-${logoStyle} pos-l"><img src="${logo}" alt="${esc(d.company || '회사')} 로고"></div>` : '';
@@ -857,6 +844,7 @@ function fillForm() {
   renderCertOpts();
 }
 function updateLogoThumb() {
+  if (!$('logoThumb')) return;
   const l = logoSrc(state.logo), th = $('logoThumb');
   th.style.backgroundImage = l ? `url('${l}')` : '';
   th.textContent = l ? '' : '로고 없음';
@@ -910,8 +898,6 @@ $('photoFile').addEventListener('change', (e) => {
 $('certOpts').addEventListener('change', syncCerts);
 $('certAdd').addEventListener('click', addCert);
 $('certNew').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addCert(); } });
-$('logoAdd').addEventListener('click', () => { state.logo = 'mega'; refresh(); });
-$('logoClear').addEventListener('click', () => { state.logo = ''; refresh(); });
 async function saveCardImage(cardEl, d) {
   if (!cardEl) return;
   if (!window.html2canvas) { toast('이미지 기능을 불러오지 못했어요. 새로고침 후 다시 눌러 주세요'); return; }
